@@ -53,4 +53,8 @@ async function getUserdeal(req, res) {
     res.status(200).json(favs);
 }
 
+
+
+
+
 module.exports = dealRouter;

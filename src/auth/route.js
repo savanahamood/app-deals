@@ -12,7 +12,23 @@ authRouter.get("/users/:id", getOneuser);
 authRouter.post("/users", createuser);
 authRouter.put("/users/:id",updateuser);
 authRouter.delete("/users/:id",deleteuser);
+authRouter.post("/users/delete", deleteusers);
 
+async function deleteusers(req, res) {
+  try {
+    const dealIdsToDelete = req.body.Deal_ID; // Assuming that the frontend sends the array of deal IDs to delete
+    const deletedDeals = [];
+
+    for (const id of dealIdsToDelete) {
+      const dealRecord = await deal.delete(id);
+      deletedDeals.push(dealRecord);
+    }
+
+    res.status(204).json(deletedDeals);
+  } catch (error) {
+    res.status(500).json({ error: "Unable to delete deals" });
+  }
+}
 authRouter.post("/signup", async (req, res, next) => {
   try {
     let userRecord = await users.create(req.body);
@@ -28,7 +44,7 @@ authRouter.post("/signup", async (req, res, next) => {
 authRouter.post("/signin", basicAuth, async (req, res, next) => {
   try {
     // Get the user from the database
-    const user = await users.findOne({ where: { username: req.body.username } });
+    const user = await users.findOne({ where: { email: req.body.email } });
 
     if (user) {
       // Update the Last_Login_DateTime_UTC to the current UTC time
