@@ -7,7 +7,6 @@ const Deals = (sequelize, DataTypes) =>
     Server_DateTime: {type: DataTypes.DATE},
     DateTime_UTC: {type: DataTypes.DATE},
     Update_DateTime_UTC: { type: DataTypes.DATE},
-    Last_Login_DateTime_UTC: { type: DataTypes.DATE },
     Name: { type: DataTypes.STRING },
     Description: { type: DataTypes.STRING },
     Status: { type: DataTypes.STRING },

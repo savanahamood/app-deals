@@ -13,7 +13,7 @@ const userModel = (sequelize, DataTypes) => {
     allowNull: true, },
     Name: { type: DataTypes.STRING },
     image: { type: DataTypes.STRING },
-    Email: { type: DataTypes.STRING },
+    email: {  type: DataTypes.STRING, required: true, unique: true},
     Phone: { type: DataTypes.STRING },
     Status: { type: DataTypes.STRING },
     Gender: { type: DataTypes.STRING },
@@ -24,7 +24,7 @@ const userModel = (sequelize, DataTypes) => {
     token: {
       type: DataTypes.VIRTUAL,
       get() {
-        return jwt.sign({ username: this.username,role: this.role, id:this.id  }, SECRET);
+        return jwt.sign({ email: this.email,role: this.role, id:this.id  }, SECRET);
       },
       set(tokenObj) {
         let token = jwt.sign(tokenObj, SECRET);
@@ -56,8 +56,8 @@ const userModel = (sequelize, DataTypes) => {
     user.Update_DateTime_UTC = new Date().toUTCString();
     // You can also set other fields that need to be updated during an update operation here.
   });
-  model.authenticateBasic = async function (username, password) {
-    const user = await this.findOne({ where: { username: username } });
+  model.authenticateBasic = async function (email, password) {
+    const user = await this.findOne({ where: { email: email } });
     const valid = await bcrypt.compare(password, user.password);
     if (valid) { return user; }
     throw new Error('Invalid User');
@@ -66,7 +66,7 @@ const userModel = (sequelize, DataTypes) => {
   model.authenticateToken = async function (token) {
     try {
       const parsedToken = jwt.verify(token, SECRET);
-      const user = await this.findOne({ where: { username: parsedToken.username } });
+      const user = await this.findOne({ where: { email: parsedToken.email } });
       if (user) { return user; }
       throw new Error("User Not Found");
     } catch (e) {
