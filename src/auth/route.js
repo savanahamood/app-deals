@@ -6,6 +6,9 @@ const { userCollection } = require("../models/index");
 
 const { users } = require("../models/index");
 const basicAuth = require("./middleware/basic.js");
+const multer = require('multer')
+const path = require('path')
+const bearerAuth = require("./middleware/bearer.js");
 
 authRouter.get("/users", getuser);
 authRouter.get("/users/:id", getOneuser);
@@ -41,27 +44,27 @@ authRouter.post("/signup", async (req, res, next) => {
 // authRouter.post("/signin", basicAuth, (req, res, next) => {
 //   res.status(200).json(req.user);
 // });
-authRouter.post("/signin", basicAuth, async (req, res, next) => {
-  try {
+authRouter.post("/signin", basicAuth, (req, res, next) => {
+ 
     // Get the user from the database
-    const user = await users.findOne({ where: { email: req.body.email } });
-
-    if (user) {
+   
+   
       // Update the Last_Login_DateTime_UTC to the current UTC time
-      const now = new Date();
-      now.setUTCHours(now.getUTCHours() + 3); // Adjust for UTC+3
+      // const now = new Date();
+      // now.setUTCHours(now.getUTCHours() + 3); // Adjust for UTC+3
 
       // Update the Last_Login_DateTime_UTC to the current time
-      user.Last_Login_DateTime_UTC = now.toISOString();
+      // req.user.Last_Login_DateTime_UTC = now.toISOString();
       // Save the user with the updated Last_Login_DateTime_UTC
-      await user.save();
-    }
-
+      // req.user.save();
+  
     res.status(200).json(req.user);
-  } catch (error) {
-    next(error);
-  }
-});
+  } 
+);
+
+// authRouter.post("/signin", basicAuth, (req, res, next) => {
+//   res.status(200).json(req.user);
+// });
 async function getuser(req, res) {
   let dealRecord = await userCollection.get();
   res.status(200).json(dealRecord);
@@ -94,7 +97,7 @@ async function createuser(req, res) {
 async function updateuser(req, res) {
   let id = parseInt(req.params.id);
   let dealData = req.body;
-  
+
   dealData.Update_DateTime_UTC = new Date().toUTCString();
 
   let dealRecord = await userCollection.update(id, dealData);
@@ -106,4 +109,113 @@ async function deleteuser(req, res) {
   let dealRecord = await userCollection.delete(id);
   res.status(204).json(dealRecord);
 }
+
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '..', 'Images'));
+  },
+  filename: (req, file, cb) => {
+      cb(null, Date.now() + path.extname(file.originalname))
+  }
+})
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: '1000000' },
+  fileFilter: (req, file, cb) => {
+      const fileTypes = /jpeg|jpg|png|PNG|gif/
+      const mimeType = fileTypes.test(file.mimetype)
+      const extname = fileTypes.test(path.extname(file.originalname))
+      if (mimeType && extname) {
+          return cb(null, true)
+      }
+      cb('Give proper files to upload')
+  }
+}).single('image')
+
+// authRouter.post('/upload', upload, async (req, res) => {
+//   try {
+//     let info = {
+//       image: `/Images/${req.file.filename}`,
+//       email: req.body.email,
+//       password: req.body.password,
+//       Name: req.body.Name,
+//       Phone: req.body.Phone,
+//       Status: req.body.Status,
+//       Gender: req.body.Gender,
+//       Date_Of_Birth: req.body.Date_Of_Birth,
+//       role: req.body.role,
+//       username: req.body.username,
+
+
+//   }
+//     let dealRecord = await userCollection.create(info);
+
+//     res.status(201).json(dealRecord);
+//   } catch (error) {
+//     console.error(error);
+
+//     // If an error occurs, handle it appropriately
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// })
+
+// authRouter.put('/upload/:id',bearerAuth, upload, async (req, res) => {
+//   let id = req.user.id;
+//   try {
+//     let info = {
+//       image: `/Images/${req.file.filename}`,
+//       email: req.body.email,
+//       password: req.body.password,
+//       Name: req.body.Name,
+//       Phone: req.body.Phone,
+//       Status: req.body.Status,
+//       Gender: req.body.Gender,
+//       Date_Of_Birth: req.body.Date_Of_Birth,
+//       role: req.body.role,
+//       username: req.body.username,
+
+
+//   }
+//     let dealRecord = await userCollection.update(id,info);
+
+//     res.status(201).json(dealRecord);
+//   } catch (error) {
+//     console.error(error);
+
+//     // If an error occurs, handle it appropriately
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// })
+
+authRouter.put('/upload/:id', bearerAuth, upload, async (req, res) => {
+  let id = req.user.id;
+  try {
+    let info = {
+      image: `/Images/${req.file.filename}`,
+      email: req.body.email,
+      password: req.body.password,
+      Name: req.body.Name,
+      Phone: req.body.Phone,
+      Status: req.body.Status,
+      Gender: req.body.Gender,
+      Date_Of_Birth: req.body.Date_Of_Birth,
+      role: req.body.role,
+      username: req.body.username,
+    }
+
+    let dealRecord = await userCollection.update(id, info);
+    res.status(201).json(dealRecord);
+  } catch (error) {
+    console.error(error);
+
+    // If an error occurs, handle it appropriately
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
+  }
+})
+
+
+
+
+
 module.exports = authRouter;
