@@ -19,16 +19,24 @@ const userCollection = new Collection(user);
 const dealCollection = new Collection(deal);
 const climeddealsCollection = new Collection(climeddeals);
 
-user.hasMany(deal, {
+// user.hasMany(deal, {
+//   foreignKey: 'User_ID',
+//   sourceKey: 'id',
+// });
+// deal.belongsTo(user, {
+//   foreignKey: 'User_ID',
+//   targetKey: 'id',
+// });
+
+
+user.hasMany(climeddeals, {
   foreignKey: 'User_ID',
   sourceKey: 'id',
 });
-deal.belongsTo(user, {
+climeddeals.belongsTo(user, {
   foreignKey: 'User_ID',
   targetKey: 'id',
 });
-
-
 deal.hasMany(climeddeals, {
   foreignKey: 'Deal_ID',
   sourceKey: 'id',
@@ -37,7 +45,6 @@ climeddeals.belongsTo(deal, {
   foreignKey: 'Deal_ID',
   targetKey: 'id',
 });
-
 
 module.exports = {
   db: sequelize,

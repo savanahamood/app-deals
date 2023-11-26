@@ -11,6 +11,7 @@ dealRouter.get("/deal", getdeal);
 dealRouter.get("/deal/:id", getOnedeal);
 dealRouter.post("/deal", createdeal);
 dealRouter.put("/deal/:id",updatedeal);
+
 dealRouter.delete("/deal/:id",deletedeal);
 // dealRouter.get("/ownerdeal/:id",bearerAuth,acl("readOwner"),getUserdeal);
 
@@ -33,8 +34,11 @@ async function createdeal(req, res) {
 async function updatedeal(req, res) {
     let id = parseInt(req.params.id);
     let dealData = req.body;
-    dealData.Update_DateTime_UTC = new Date().toUTCString();
-
+    
+   
+        // dealData.Status = dealData.newStatus;
+  
+      
     // let activitsyData = await deal.get(id);
     // if (activitsyData.ownerId == req.user.id || req.user.role == "admin") {
         let dealRecord = await deal.update(id, dealData);
@@ -42,6 +46,9 @@ async function updatedeal(req, res) {
     
     // res.json("you can't update this deal");
 }
+
+
+  
 async function deletedeal(req, res) {
     let id = parseInt(req.params.id);
 
